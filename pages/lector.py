@@ -1,7 +1,6 @@
 import streamlit as st
-import cv2
+from PIL import Image
 from pyzbar.pyzbar import decode
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 import sqlite3
 import pandas as pd
 
@@ -9,44 +8,33 @@ st.title("📷 Lector de código de barras")
 
 conn = sqlite3.connect("database.db", check_same_thread=False)
 
-class BarcodeScanner(VideoTransformerBase):
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        codigos = decode(img)
-
-        for codigo in codigos:
-            datos = codigo.data.decode("utf-8")
-            st.session_state["codigo_detectado"] = datos
-
-            pts = codigo.polygon
-            if len(pts) == 4:
-                pts = [(p.x, p.y) for p in pts]
-                cv2.polylines(img, [cv2.convexHull(
-                    cv2.UMat(
-                        cv2.array(pts)
-                    )
-                )], True, (0, 255, 0), 2)
-
-        return img
-
-webrtc_streamer(
-    key="lector",
-    video_transformer_factory=BarcodeScanner
+archivo = st.file_uploader(
+    "Sube una imagen del código de barras",
+    type=["png", "jpg", "jpeg"]
 )
 
-if "codigo_detectado" in st.session_state:
-    codigo = st.session_state["codigo_detectado"]
-    st.success(f"Código detectado: {codigo}")
+if archivo is not None:
+    imagen = Image.open(archivo)
+    st.image(imagen, caption="Imagen subida", use_container_width=True)
 
-    try:
-        producto = pd.read_sql_query(
-            f"SELECT * FROM productos WHERE codigo='{codigo}'",
-            conn
-        )
+    codigos = decode(imagen)
 
-        if not producto.empty:
-            st.dataframe(producto, use_container_width=True)
-        else:
-            st.warning("Producto no encontrado")
-    except:
-        st.error("Aún no hay productos con código registrado")
+    if codigos:
+        codigo = codigos[0].data.decode("utf-8")
+        st.success(f"Código detectado: {codigo}")
+
+        try:
+            producto = pd.read_sql_query(
+                "SELECT * FROM productos WHERE codigo=?",
+                conn,
+                params=(codigo,)
+            )
+
+            if not producto.empty:
+                st.dataframe(producto, use_container_width=True)
+            else:
+                st.warning("Producto no encontrado")
+        except Exception as e:
+            st.error(f"Error al buscar producto: {e}")
+    else:
+        st.warning("No se detectó ningún código")
