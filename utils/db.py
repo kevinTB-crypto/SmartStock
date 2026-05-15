@@ -7,7 +7,7 @@ def crear_tablas():
     conn = conectar()
     c = conn.cursor()
 
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS productos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
@@ -16,17 +16,16 @@ def crear_tablas():
             stock INTEGER,
             minimo INTEGER
         )
-    ''')
+    """)
 
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS ventas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             producto TEXT,
             cantidad INTEGER,
-            total REAL,
-            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            total REAL
         )
-    ''')
+    """)
 
     conn.commit()
     conn.close()
