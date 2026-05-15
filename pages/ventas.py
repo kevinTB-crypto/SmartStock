@@ -61,7 +61,7 @@ else:
 # historial de ventas
 st.subheader("📋 Historial de ventas")
 
-ventas = pd.read_sql_query("SELECT * FROM ventas ORDER BY id DESC", conn)
+ventas = pd.read_sql_query("SELECT * FROM ventas ORDER BY fecha DESC", conn)
 
 if not ventas.empty:
     st.dataframe(ventas, use_container_width=True)
