@@ -4,25 +4,24 @@ import pandas as pd
 import os
 import time
 from utils.barcode_generator import generar_codigo
+from utils.db import crear_tablas
+
+crear_tablas()
 
 conn = sqlite3.connect("database.db", check_same_thread=False)
 cursor = conn.cursor()
 
-# asegurar columna codigo e imagen
-try:
-    cursor.execute("ALTER TABLE productos ADD COLUMN codigo TEXT")
-    conn.commit()
-except:
-    pass
-
-try:
-    cursor.execute("ALTER TABLE productos ADD COLUMN imagen TEXT")
-    conn.commit()
-except:
-    pass
+# asegurar columnas extra
+for columna, tipo in [("codigo", "TEXT"), ("imagen", "TEXT")]:
+    try:
+        cursor.execute(f"ALTER TABLE productos ADD COLUMN {columna} {tipo}")
+        conn.commit()
+    except:
+        pass
 
 st.title("📦 Inventario")
 
+# formulario
 with st.form("producto_form"):
     nombre = st.text_input("Nombre")
     categoria = st.text_input("Categoría")
@@ -38,28 +37,26 @@ with st.form("producto_form"):
         ruta_imagen = ""
 
         if imagen is not None:
+            os.makedirs("uploads", exist_ok=True)
             ruta_imagen = f"uploads/{imagen.name}"
             with open(ruta_imagen, "wb") as f:
                 f.write(imagen.getbuffer())
 
-        cursor.execute(
-            """
-            INSERT INTO productos (nombre,categoria,precio,stock,minimo,codigo,imagen)
-            VALUES (?,?,?,?,?,?,?)
-            """,
-            (nombre, categoria, precio, stock, minimo, codigo, ruta_imagen)
-        )
-        conn.commit()
-        st.success("Producto agregado")
+        cursor.execute("""
+            INSERT INTO productos (nombre, categoria, precio, stock, minimo, codigo, imagen)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (nombre, categoria, precio, stock, minimo, codigo, ruta_imagen))
 
-                cursor.execute(
+        cursor.execute(
             "INSERT INTO movimientos (producto, tipo, cantidad) VALUES (?, ?, ?)",
             (nombre, "entrada", stock)
         )
+
         conn.commit()
+        st.success("Producto agregado")
+        st.rerun()
 
-st.subheader("Lista de productos")
-
+# listado
 df = pd.read_sql_query("SELECT * FROM productos", conn)
 
 st.subheader("🔍 Buscar productos")
@@ -74,16 +71,16 @@ if not df.empty:
     if categoria_filtro:
         df = df[df["categoria"].str.contains(categoria_filtro, case=False, na=False)]
 
-st.dataframe(df, use_container_width=True)
-
-if not df.empty:
     st.dataframe(df, use_container_width=True)
 
     producto = st.selectbox("Ver detalle", df["nombre"])
     fila = df[df["nombre"] == producto].iloc[0]
 
-    if fila["imagen"] and os.path.exists(fila["imagen"]):
-        st.image(fila["imagen"], width=220)
+    if fila["imagen"] and os.path.exists(str(fila["imagen"])):
+        st.image(str(fila["imagen"]), width=220)
 
-    codigo_img = generar_codigo(fila["codigo"])
-    st.image(codigo_img, caption=f"Código: {fila['codigo']}")
+    if fila["codigo"]:
+        codigo_img = generar_codigo(str(fila["codigo"]))
+        st.image(codigo_img, caption=f"Código: {fila['codigo']}")
+else:
+    st.info("No hay productos registrados")
