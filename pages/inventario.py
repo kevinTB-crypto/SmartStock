@@ -62,6 +62,20 @@ st.subheader("Lista de productos")
 
 df = pd.read_sql_query("SELECT * FROM productos", conn)
 
+st.subheader("🔍 Buscar productos")
+
+buscar = st.text_input("Buscar por nombre")
+categoria_filtro = st.text_input("Filtrar por categoría")
+
+if not df.empty:
+    if buscar:
+        df = df[df["nombre"].str.contains(buscar, case=False, na=False)]
+
+    if categoria_filtro:
+        df = df[df["categoria"].str.contains(categoria_filtro, case=False, na=False)]
+
+st.dataframe(df, use_container_width=True)
+
 if not df.empty:
     st.dataframe(df, use_container_width=True)
 
