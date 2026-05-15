@@ -1,11 +1,15 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+from utils.db import crear_tablas
+
+# asegurar que exista la tabla
+crear_tablas()
 
 conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
 
-st.title('💰 Registro de Ventas')
+st.title("💰 Registro de Ventas")
 
 productos = pd.read_sql_query("SELECT * FROM productos", conn)
 
@@ -22,7 +26,12 @@ else:
     st.write(f"Stock disponible: {stock}")
     st.write(f"Precio: ${precio}")
 
-    cantidad = st.number_input("Cantidad", min_value=1, max_value=max(stock, 1))
+    cantidad = st.number_input(
+        "Cantidad",
+        min_value=1,
+        max_value=max(stock, 1),
+        step=1
+    )
 
     if st.button("Vender"):
         if stock >= cantidad:
@@ -46,9 +55,11 @@ else:
 
 st.subheader("Historial de ventas")
 
-ventas = pd.read_sql_query("SELECT * FROM ventas ORDER BY id DESC", conn)
-
-if not ventas.empty:
-    st.dataframe(ventas, use_container_width=True)
-else:
-    st.info("Sin ventas registradas")
+try:
+    ventas = pd.read_sql_query("SELECT * FROM ventas ORDER BY id DESC", conn)
+    if not ventas.empty:
+        st.dataframe(ventas, use_container_width=True)
+    else:
+        st.info("Sin ventas registradas")
+except:
+    st.info("La tabla de ventas se creará automáticamente al registrar la primera venta")
