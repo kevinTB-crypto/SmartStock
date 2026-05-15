@@ -16,25 +16,28 @@ if "logueado" not in st.session_state:
     st.session_state.logueado = False
 
 if not st.session_state.logueado:
-    st.title("🔐 SmartStock Login")
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-    usuario = st.text_input("Usuario")
-    password = st.text_input("Contraseña", type="password")
+    with col2:
+        st.markdown("## 📦 SmartStock")
+        st.markdown("### Iniciar sesión")
 
-    if st.button("Ingresar"):
-        cursor.execute(
-            "SELECT * FROM usuarios WHERE usuario=? AND password=?",
-            (usuario, password)
-        )
-        user = cursor.fetchone()
+        usuario = st.text_input("Usuario")
+        password = st.text_input("Contraseña", type="password")
 
-        if user:
-            st.session_state.logueado = True
-            st.success("Acceso correcto")
-            st.rerun()
-        else:
-            st.error("Credenciales incorrectas")
+        if st.button("Ingresar"):
+            cursor.execute(
+                "SELECT * FROM usuarios WHERE usuario=? AND password=?",
+                (usuario, password)
+            )
+            user = cursor.fetchone()
+
+            if user:
+                st.session_state.logueado = True
+                st.rerun()
+            else:
+                st.error("Credenciales incorrectas")
 else:
     st.title("📦 SmartStock")
-    st.success("Sesión iniciada")
-    st.write("Usa el menú lateral para navegar.")
+    st.success("Sesión iniciada correctamente")
+    st.write("Usa el menú lateral para navegar por el sistema.")
