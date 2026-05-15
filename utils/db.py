@@ -27,5 +27,22 @@ def crear_tablas():
         )
     """)
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario TEXT UNIQUE,
+            password TEXT,
+            rol TEXT
+        )
+    """)
+
+    # usuario inicial
+    c.execute("SELECT * FROM usuarios WHERE usuario='admin'")
+    if c.fetchone() is None:
+        c.execute(
+            "INSERT INTO usuarios (usuario, password, rol) VALUES (?, ?, ?)",
+            ("admin", "1234", "Administrador")
+        )
+
     conn.commit()
     conn.close()
