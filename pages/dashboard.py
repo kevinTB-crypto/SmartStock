@@ -11,7 +11,22 @@ conn = sqlite3.connect("database.db", check_same_thread=False)
 productos = pd.read_sql_query("SELECT * FROM productos", conn)
 ventas = pd.read_sql_query("SELECT * FROM ventas", conn)
 
+# detectar productos bajos
+if not productos.empty:
+    productos_bajos = productos[productos["stock"] <= productos["minimo"]]
+else:
+    productos_bajos = pd.DataFrame()
 st.title("📊 Dashboard SmartStock")
+
+if not productos_bajos.empty:
+    st.error(f"⚠ Hay {len(productos_bajos)} producto(s) con stock bajo")
+else:
+    st.success("✅ Todo el inventario está en buen estado")
+
+if not productos_bajos.empty:
+    st.audio(
+        "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+    )
 
 # métricas
 col1, col2, col3 = st.columns(3)
@@ -66,3 +81,10 @@ if not ventas.empty:
     st.plotly_chart(fig2, use_container_width=True)
 else:
     st.info("Aún no hay ventas para mostrar")
+
+st.subheader("🚨 Productos críticos")
+
+if not productos_bajos.empty:
+    st.dataframe(productos_bajos, use_container_width=True)
+else:
+    st.info("No hay productos críticos")
