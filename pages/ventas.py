@@ -53,6 +53,11 @@ else:
         else:
             st.error("Stock insuficiente")
 
+            cursor.execute(
+                "INSERT INTO movimientos (producto, tipo, cantidad) VALUES (?, ?, ?)",
+                (producto, "venta", cantidad)
+            )
+
 st.subheader("Historial de ventas")
 
 try:

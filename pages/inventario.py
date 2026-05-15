@@ -52,6 +52,12 @@ with st.form("producto_form"):
         conn.commit()
         st.success("Producto agregado")
 
+                cursor.execute(
+            "INSERT INTO movimientos (producto, tipo, cantidad) VALUES (?, ?, ?)",
+            (nombre, "entrada", stock)
+        )
+        conn.commit()
+
 st.subheader("Lista de productos")
 
 df = pd.read_sql_query("SELECT * FROM productos", conn)

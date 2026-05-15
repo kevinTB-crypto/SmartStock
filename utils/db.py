@@ -46,3 +46,13 @@ def crear_tablas():
 
     conn.commit()
     conn.close()
+
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS movimientos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            producto TEXT,
+            tipo TEXT,
+            cantidad INTEGER,
+            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
