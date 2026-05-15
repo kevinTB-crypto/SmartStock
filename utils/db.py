@@ -1,7 +1,7 @@
 import sqlite3
 
 def conectar():
-    return sqlite3.connect('database.db', check_same_thread=False)
+    return sqlite3.connect("database.db", check_same_thread=False)
 
 def crear_tablas():
     conn = conectar()
@@ -14,7 +14,9 @@ def crear_tablas():
             categoria TEXT,
             precio REAL,
             stock INTEGER,
-            minimo INTEGER
+            minimo INTEGER,
+            codigo TEXT,
+            imagen TEXT
         )
     """)
 
@@ -36,7 +38,16 @@ def crear_tablas():
         )
     """)
 
-    # usuario inicial
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS movimientos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            producto TEXT,
+            tipo TEXT,
+            cantidad INTEGER,
+            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     c.execute("SELECT * FROM usuarios WHERE usuario='admin'")
     if c.fetchone() is None:
         c.execute(
@@ -46,13 +57,3 @@ def crear_tablas():
 
     conn.commit()
     conn.close()
-
-        c.execute("""
-        CREATE TABLE IF NOT EXISTS movimientos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            producto TEXT,
-            tipo TEXT,
-            cantidad INTEGER,
-            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
