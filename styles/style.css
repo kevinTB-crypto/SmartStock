@@ -1,0 +1,26 @@
+.stApp {
+    background-color: #f5f7fb;
+}
+
+h1, h2, h3 {
+    color: #1f2937;
+    font-weight: bold;
+}
+
+[data-testid="stMetricValue"] {
+    font-size: 28px;
+    color: #0f172a;
+}
+
+div.stButton > button {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 18px;
+    font-weight: bold;
+}
+
+div.stButton > button:hover {
+    background-color: #1d4ed8;
+}

@@ -9,6 +9,9 @@ cursor = conn.cursor()
 
 st.set_page_config(page_title="SmartStock", layout="wide")
 
+with open("styles/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 if "logueado" not in st.session_state:
     st.session_state.logueado = False
 
